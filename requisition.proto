@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+package requisition;
+
+// Requisition Service definition
+default_service RequisitionService {
+  // Creates a new RequisitionOrder
+  rpc CreateRequisitionOrder(CreateRequisitionOrderRequest) returns (CreateRequisitionOrderResponse);
+
+  // Gets a RequisitionOrder by ID
+  rpc GetRequisitionOrder(GetRequisitionOrderRequest) returns (GetRequisitionOrderResponse);
+
+  // Lists requisitions (with optional filters)
+  rpc ListRequisitionOrders(ListRequisitionOrdersRequest) returns (ListRequisitionOrdersResponse);
+
+  // Updates a requisition
+  rpc UpdateRequisitionOrder(UpdateRequisitionOrderRequest) returns (UpdateRequisitionOrderResponse);
+
+  // Gets a RequistionItem by ID
+  rpc GetRequisitionItem(GetRequisitionItemRequest) returns (GetRequisitionItemResponse);
+
+  // List requisition items (with optional filters)
+  rpc ListRequisitionItems(ListRequisitionItemsRequest) returns (ListRequisitionItemsResponse);
+
+  // Update a requisition item
+  rpc UpdateRequisitionItem(UpdateRequisitionItemRequest) returns (UpdateRequisitionItemResponse);
+
+  // Potentially used to reserve inventory items for requisition
+  rpc ReserveInventory(ReserveInventoryRequest) returns (ReserveInventoryResponse);
+
+  // Release reserved inventory items
+  rpc ReleaseInventory(ReleaseInventoryRequest) returns (ReleaseInventoryResponse);
+
+}
+
+// --- Messages ---
+
+message CreateRequisitionOrderRequest {
+  string work_order_id = 1;
+  repeated RequisitionItemInput items = 2;
+  string requested_by = 3;
+}
+
+message CreateRequisitionOrderResponse {
+  string requisition_id = 1;
+}
+
+message GetRequisitionOrderRequest {
+  string requisition_id = 1;
+}
+
+message GetRequisitionOrderResponse {
+  Requisition requisition = 1;
+}
+
+message ListRequisitionOrdersRequest {
+  optional string work_order_id = 1;
+  optional string status = 2;
+  optional string assigned_to = 3;
+}
+
+message ListRequisitionOrdersResponse {
+  repeated Requisition requisitions = 1;
+}
+
+message UpdateRequisitionOrderRequest {
+  string requisition_id = 1;
+  optional string status = 2;
+}
+
+message UpdateRequisitionOrderResponse {
+  Requisition requisition = 1;
+}
+
+message GetRequisitionItemRequest {
+  string requisition_item_id = 1;
+}
+
+message GetRequisitionItemResponse {
+  RequisitionItem items = 1;
+}
+
+message ListRequisitionItemsRequest {
+  string requisition_id = 1;
+  optional string requisition_id = 2;
+  optional string operation_id = 3;
+  optional string stock_item_id = 4;
+  optional string status = 5;
+  optional string last_action_by = 6;
+}
+
+message ListRequisitionItemsResponse {
+  repeated RequisitionItem items = 1;
+}
+
+message UpdateRequisitionItemRequest {
+  string requisition_item_id = 1;
+  optional string status = 2;
+  optional int32 amount_filled = 3;
+  optional string last_action_by = 4;
+}
+
+message UpdateRequisitionItemResponse {
+  RequisitionItem item = 1;
+}
+
+message ReserveInventoryRequest {
+  string reservation_id = 1;
+  repeated InventoryReservation reservations = 2;
+}
+
+message ReserveInventoryResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReleaseInventoryRequest {
+  string reservation_id = 1;
+  repeated InventoryReservation reservations = 2;
+}
+
+message ReleaseInventoryResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// --- Data Structures ---
+
+message Requisition {
+  string id = 1;
+  string work_order_id = 2;
+  string status = 3;
+  string requested_by = 4;
+  string assigned_to = 5;
+  repeated RequisitionItem items = 6;
+  string created_at = 7;
+  string updated_at = 8;
+  string notes = 9;
+}
+
+message RequisitionItem {
+  string id = 1;
+  string inventory_item_id = 2;
+  string description = 3;
+  int32 quantity_requested = 4;
+  int32 quantity_picked = 5;
+  string location = 6;
+  string status = 7;
+  string picked_by = 8;
+  string picked_at = 9;
+}
+
+message RequisitionItemInput {
+  string inventory_item_id = 1;
+  int32 quantity_requested = 2;
+}
+
+message InventoryReservation {
+  string stock_item_id = 1;
+  int32 quantity = 2;
+  string location = 3;
+}
+
+message AuditLogEntry {
+  string timestamp = 1;
+  string user = 2;
+  string action = 3;
+  string details = 4;
+} 
